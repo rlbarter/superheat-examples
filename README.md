@@ -77,9 +77,11 @@ and these vectors can be downloaded from
 [here](https://code.google.com/archive/p/word2vec/).
 
 The original file is `GoogleNews-vectors-negative300.bin.gz`, and the
-`convert_word2vec.py` file in the `/word2vec` folder of this
-repository contains code to convert the original file to a .csv
-format. An R version has been generated and is called
+`convert_word2vec.py` file  (adapted from suggestions
+from
+[this stack overflow post](http://stackoverflow.com/questions/27324292/convert-word2vec-bin-file-to-text))
+in the `/word2vec` folder of this repository contains code to convert
+the original  file to a .csv format. An R version has been generated and is called
 `GoogleNews.RData`.
 
 
