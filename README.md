@@ -18,13 +18,10 @@ transplantation trends
 
 Read below to understand how to reproduce these examples yourself.
 
-1. Clone this repository using `git clone
+1. Clone this repository by opening a terminal window and typing `git clone
 https://github.com/rlbarter/superheat-examples`
 
 1. Install R and RStudio.
-
-1. Open RStudio and set the wordking directory to the
-   `/superheat-examples` folder that you cloned onto your machine.
 
 1. Install the required packages by running
 `source("00-install-packages.R")` inside your RStudio console.
@@ -38,11 +35,15 @@ https://github.com/rlbarter/superheat-examples`
 
 1. Hit the "Knit" button in RStudio.
 
-1. Wait for the document to compile.
+1. Wait for the document to compile (the word2vec example will take
+   around half an hour the first time you run it).
 
 1. Explore the html file containing the code, analysis and figures.
 
-1. Edit and play with the code as you wish!
+1. Edit and play with the code as you wish. Note that if you would
+   like to run the code directly in your console, you need to set your
+   working directory to the `/superheat-examples` folder that you
+   cloned onto your machine so that R can find the data files. 
 
 
 
