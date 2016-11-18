@@ -11,10 +11,12 @@ transplantation trends
 * Case study III: ??
 
 
-Read below to understand how to reproduce these examples yourself.
+
 
 
 ## Reproducing the examples
+
+Read below to understand how to reproduce these examples yourself.
 
 1. Clone this repository using `git clone
 https://github.com/rlbarter/superheat-examples`
@@ -44,8 +46,7 @@ https://github.com/rlbarter/superheat-examples`
 
 
 
-## Case Study I: combining data sources to explore global organ
-transplantation trends
+## Case Study I: combining data sources to explore global organ transplantation trends
 
 The data for this example comes from two sources. The first is from
 the Global
@@ -64,14 +65,7 @@ Human Development Reports which can be downloaded from
 
 Word2Vec is an extremely popular group of models for embedding words
 into high dimensional spaces such that their relative distances to one
-another convey semantic meaning. The canonical example of the success
-of these word embeddings is the following example
-
-$$\overrightarrow{\text{man}} - \overrightarrow{\text{king}} + \overrightarrow{\text{woman}} = \overrightarrow{\text{queen}}$$
-
-That is, that if you take the word vector for "man'', subtract the
-word vector for "king'' and add the word vector for "woman", you
-approximately arrive at the word vector for  ''queen''. These models
+another convey semantic meaning. These models
 are quite remarkable and are an exciting step towards teaching
 machines to understand language.
 
@@ -79,7 +73,7 @@ In 2013, Google published pre-trained vectors trained on part of the
 Google News dataset which consists of around 100 billion words. The
 model contains 300-dimensional vectors for 3 million words and phrases
 and these vectors can be downloaded from
-[here](\url{https://code.google.com/archive/p/word2vec/).
+[here](https://code.google.com/archive/p/word2vec/).
 
 The original file is `GoogleNews-vectors-negative300.bin.gz`, and the
 `convert_word2vec.py` file in the `/word2vec` folder of this
