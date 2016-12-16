@@ -1,0 +1,11 @@
+*.mat
+*_cache
+*.bin.gz
+*.Rdata
+*.RData
+*.aux
+*.blg
+*.log
+*.out
+*.bbl
+Old
