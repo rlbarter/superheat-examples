@@ -17,7 +17,7 @@ Each case study is described breifly below, and is accompanied by a reproducibil
 
 The data for this example comes from two sources. The first is from the Global Observatory on Donation and Transplantation database curated by WHO which can be downloaded from [here](http://www.transplant-observatory.org/export-database/). The second dataset comes from the United Nations Development Program's Human Development Reports which can be downloaded from [here](http://hdr.undp.org/en/data#).
 
-> Reproducibility: easy (simply download the data into the same directory)
+> **Reproducibility: easy** (simply download the data into the same directory)
 
 
 
@@ -30,7 +30,7 @@ In 2013, Google published pre-trained vectors trained on part of the Google News
 
 The original file is `GoogleNews-vectors-negative300.bin.gz`, and the `convert_word2vec.py` file  (adapted from suggestions from [this stack overflow post](http://stackoverflow.com/questions/27324292/convert-word2vec-bin-file-to-text)) in the `/word2vec` folder of this repository contains code to convert the original  file to a .csv format. An R version has been generated and is called `GoogleNews.RData`.
 
-> Reproducibility: medium (need to download the large Google News dataset and then convert it to csv using a separate convert_word2vec.py)
+> **Reproducibility: medium** (need to download the large Google News dataset and then convert it to csv using a separate convert_word2vec.py)
 
 
 ## Case study III: predicting the brain's response to visual stimuli using fMRI
@@ -40,6 +40,6 @@ This case study aims to evaluate the performance of a number of models of the br
 
 The data itself is hosted on the Collaborative Research in Computational Neuroscience (CRCNS) Data Sharing repository and can be found [here](https://crcns.org/data-sets/vc/vim-1). However, this repository only contains the voxel responses and the raw images. It does not contain the Gabor wavelet transformations.
 
-> Reproducibility: hard (the data repository unfortunately does not contain the Gabor wavelet features, and some of the code chunks were run using 24 cores of a computer cluster)
+> **Reproducibility: hard** (the data repository unfortunately does not contain the Gabor wavelet features, and some of the code chunks were run using 24 cores of a computer cluster)
 
 
