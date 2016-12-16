@@ -1,3 +1,5 @@
+*.Rhistory
+fMRI/raw_data
 *.mat
 *_cache
 *_files
