@@ -1,0 +1,368 @@
+---
+title: "Worldwide Organ Donation and Human Development"
+author: "Rebecca Barter"
+date: "11/14/2016"
+output: html_document
+---
+
+
+There is a universal shortage of organs available for transplantation leading to thousands of people dying on transplant waiting lists every year. Every country has their own system for organ donation, allocation, and transplantation, leading to vastly different donation rates across countries. This case study will use superheat combine two sources of data in order to explore the recent trends in organ donation worldwide and its relation to Human Development using data from the WHO Global Observatory on Donation and Transplantation database and Human Development data from The World Bank. Specifically, we will compare the organ donation trends of 58 countries over a 9-year time period spanning from 2006-2014, and examine the Human Development Index of these countries.
+
+
+```{r libraries, message=FALSE, warning=FALSE}
+# load in some useful libraries
+library(knitr)
+library(dplyr)
+library(DT)
+library(reshape2)
+library(superheat)
+```
+
+## Obtaining the organ data
+
+
+The organ donation dataset can be downaloaded from the [ WHO Global Observatory on Donation and Transplantation database](http://www.transplant-observatory.org/export-database/). The Global Observatory on Donation and Transplantation represents the most comprehensive source to date of worldwide data concerning activities in organ donation and transplantation derived from official sources.  The data contains a several measurements concerning the number of organ donations by country from 2000-2014.
+
+The searchable table below displays the raw data, much of which is missing. The data contains 19 measurements on various organ donation counts, for 194 countries.
+
+```{r}
+# load in the data
+organs.original <- read.csv("raw_data/global-organ-donation.csv")
+DT::datatable(organs.original, fillContainer = T, 
+              height = 600, options = list(scrollY = 350))
+```
+
+## Cleaning the data
+
+The column names in the original dataset are somewhat unintelligible. Below we modify them so that they are in a human-readable format.
+```{r clean}
+# clean the column names
+clean.colnames <- c("region", "country", "year", 
+                    "population", 
+                    "total.deceased.donors", 
+                    "brain.dead.donors",
+                    "circulatory.death.donors",
+                    "total.utilized.deceased.donors",
+                    "utilized.brain.dead.donors",
+                    "utilized.circulatory.death.donors",
+                    "deceased.kidney.donors",
+                    "living.kidney.donors",
+                    "total.kidney.donors",
+                    "deceased.liver.donors",
+                    "domino.liver.donors",
+                    "living.liver.donors",
+                    "total.liver.donors",
+                    "deceased.lung.donors",
+                    "living.lung.donors",
+                    "total.lung.donors",
+                    "total.pancreas.donors",
+                    "total.kidney.pancreas.donors",
+                    "total.small.bowel.donors")
+# clean the organs dataset
+organs.clean <- organs.original
+colnames(organs.clean) <- clean.colnames
+```
+
+We also want to convert the `population` variable to numeric format (it is currently a factor). 
+
+```{r population-numeric, warning=FALSE}
+# convert population to numeric
+organs.clean$population <- as.numeric(as.character(organs.clean$population)) 
+```
+
+
+
+Each variable (column) is described below:
+
+* `region`: The world region
+* `country`: The country
+* `year`: The year 
+* `population`: The country's population 
+* `total.deceased.donors`: The total number of organs donated from deceased individuals. This should be equal to `brain.dead.donors` + `circulatory.death.donors`.
+* `brain.dead.donors`: The number of organs donated from deceased individuals whose death has been determined by neurological criteria ("brain death")
+* `circulatory.death.donors`: The number of organs donated from deceased individuals whose death has been determined by circulatory criteria ("curculatory death")
+* `total.utilized.deceased.donors`: The number of organs from deceased donors that were used utilized in a transplant
+* `utilized.brain.dead.donors`: The number of organs from deceased donors (whose death was determined to be brain death) that were utilized in a transplant
+* `utilized.circulatory.death.donors`: The number of organs from deceased donors (whose death was determined to be circulatory death) that were utilized in a transplant
+* `deceased.x.donors`: The number of organ "x" from deceased donors
+* `living.x.donors`: The number of organ "x" from living donors
+* `total.x.donors`: The total number of organ "x" from deceased and living donors
+* `domino.liver.donors`: The number of domino liver donors
+
+
+These variable names are intuitive and in a consistent format. For example, a variable whose name begins with `total` corresponds to the total of two or more other variables (e.g. `total.kidney.donors` should be the sum of `deceased.kidney.donors` and `living.kidney.donors`). 
+
+The structure of the data is described in the Figure below which displays the variable heirarchy. Variables enclosed in a box are expected to add up to their parent variable (this turns out to not always be the case, but this is the *expectation*).
+
+```{r data-structure, echo=FALSE, fig.align="center"}
+knitr::include_graphics("Figures/organ_variables.png")
+```
+
+
+
+
+
+
+#### Remove countries for which we have no data
+
+
+There are a number of countries that appear to have no recorded donation data (note that this does not necessarily mean that there were *no* organ donations, only that the data was not provided).
+
+
+The countries that have no recorded measurements for the summary measurements `deceased.donors`, `brain.dead.donors`, and `circulatory.death.donors` are identified and removed from our dataset.
+
+```{r, warning=FALSE, collapse = TRUE}
+countries.no.data <- organs.clean %>% group_by(country) %>% 
+  # identify how many missing values are recorded for each country in the summary columns
+  summarise(region = unique(region),
+            n = n(),
+            missing.deceased = sum(is.na(total.deceased.donors)), 
+            missing.brain.dead = sum(is.na(brain.dead.donors)),
+            missing.circulatory.death = sum(is.na(circulatory.death.donors))) %>%
+  # identify countries that have completely missing data
+  mutate(no.data = ((missing.deceased == 15) & 
+                    (missing.brain.dead == 15) & 
+                    (missing.circulatory.death == 15))) %>%
+  # filter to countries with no recorded data
+  filter(no.data)
+# how many countries have missing data
+length(unique(countries.no.data$country))
+```
+
+Below, we remove these 80 countries from our dataset.
+
+```{r}
+# remove the missing data countries from the data table
+organs.clean <- organs.clean %>% 
+  filter(!(country %in% countries.no.data$country))
+```
+
+
+### Extracting relevant information
+
+Since we are only interested in the total donor counts, we decide to extract only the `total.deceased.donors` variable. 
+
+```{r }
+# total donor counts
+donor.totals <- organs.clean %>% 
+  select(region, country, year, population, 
+         count = total.deceased.donors)
+# look at the first 6 rows
+kable(head(donor.totals))
+```
+
+
+Next, we want to add a variable for "count by population" to each table.
+
+
+
+```{r}
+# add a count-by-population variable
+donor.totals <- donor.totals %>%
+  mutate(count.by.pop = count / population)
+```
+
+
+### Summarize into a matrix containing organ transplants by year for each country
+
+The primary data matrix that we will use will be the total number of organ donations by year from 2006 and 2014 and by country, filtering to countries with no more than a single missing value in that time period.
+
+The primary matrix of interest has each year as a row and each country as a column. The cell entries correspond to the number of organ donations from deceased persons per 100,000 individuals.
+
+```{r}
+# filter to only deceased donors from 2006 to 2014
+total.organs <- donor.totals %>%
+  filter(year > 2005,
+         year < 2015)
+# identify countries with more than one missing value
+few.missing.country <- total.organs %>% 
+  group_by(country) %>% 
+  # is there more than 1 year with missing data?
+  summarise(missing = sum(is.na(count.by.pop)) > 1) %>%
+  # remove these countries for which there is more than 1 year missing
+  filter(!missing) %>%
+  # isolte the unfiltered countries
+  select(country) %>%
+  unlist %>% as.character
+# remove countries with more than 1 missing value
+total.organs <- total.organs %>% 
+  filter(country %in% few.missing.country)
+# cast to year by country matrix
+donor.matrix <- acast(total.organs,
+                      country ~ year, 
+                      value.var = "count.by.pop")
+# view the first 6 rows and columns
+kable(head(donor.matrix[, 1:6]))
+```
+
+## Obtaining the Human Development Index Data
+
+Next, we want to be able to combine the organ donor data with Human Development Index (HDI) data. The data can be downlaoded from [The World Bank](http://data.worldbank.org/indicator/NY.GDP.MKTP.CD) website. The HDI is calculated based on life expectancy, education and per capita indicators and has been shown to be correlated with organ transplantation.
+
+```{r}
+# read in gdp data
+hdi <- read.csv("raw_data/hdi.csv", header = F)
+```
+
+### Cleaning the data
+
+The HDI data was read in without proper column names. The code below cleans the data so that it has a standard format
+
+```{r}
+# the column names are stored in the second row
+colnames(hdi) <- (hdi[2,])
+# remove the first two rows
+hdi <- hdi[3:nrow(hdi),]
+# change column names 1 and 2
+colnames(hdi)[1:2] <- c("rank", "country")
+# melt to long form
+hdi <- melt(hdi, id.vars = c("country", "rank"))
+# change column names
+colnames(hdi) <- c("country", "rank", "year", "hdi")
+# rearrange order of columns
+hdi <- hdi %>% dplyr::select(country, year, rank, hdi)
+# remove blank space after country name
+hdi$country <- gsub(" ", "", as.character(hdi$country))
+hdi$rank <- as.numeric(as.character(hdi$rank))
+```
+
+Next, we need to make sure that all of our countries in our organ donor dataset also appear in the HDI dataset. The code below shows that some of the countries are coded differently (e.g. the HDI dataset does not have spaces whereas the organ dataset does). We thus convert the country names in the HDI dataset to those in the organ dataset.
+
+```{r, collapse = TRUE}
+# which countries in donor.matrix are not in gdp?
+rownames(donor.matrix)[!(rownames(donor.matrix) %in% unique(hdi$country))]
+# to find column names: unique(hdi$country)[grep("Venez", unique(hdi$country))]
+# change country names accordingly
+hdi[hdi$country == "CzechRepublic", "country"] <- "Czech Republic"
+hdi[hdi$country == "DominicanRepublic", "country"] <- "Dominican Republic"
+hdi[hdi$country == "Iran(IslamicRepublicof)", "country"] <- "Iran (Islamic Republic of)"
+hdi[hdi$country == "NewZealand", "country"] <- "New Zealand"
+hdi[hdi$country == "Korea(Republicof)", "country"] <- "Republic of Korea"
+hdi[hdi$country == "SaudiArabia", "country"] <- "Saudi Arabia"
+hdi[hdi$country == "SouthAfrica", "country"] <- "South Africa"
+hdi[hdi$country == "UnitedKingdom", "country"] <- "United Kingdom"
+hdi[hdi$country == "UnitedStates", "country"] <- "United States of America"
+hdi[hdi$country == "Venezuela(BolivarianRepublicof)", "country"] <- "Venezuela (Bolivarian Republic of)"
+```
+
+Finally, we can filter the HDI dataset to the countries for which we have organ donor data.
+
+
+```{r, warning=FALSE}
+hdi.match <- left_join(data.frame(country = rownames(donor.matrix)),
+                          hdi,
+                          by = "country")
+# filter to 2014 hdi
+hdi.match.2014 <- hdi.match %>% filter(year == 2014)
+```
+
+
+## Superheat: an evaluation of organ donations by country and its relationship to HDI
+
+Our goal now is to visualize the change in organ donation trends over time by country and assess the relationship between the organ donation . 
+
+Below we calculate the number of organ donations by year. We will plot this above the columns/years of the heatmap.
+
+```{r}
+# organ donations by year (aggregated across countries)
+organs.by.year <- total.organs %>% 
+  group_by(year) %>% 
+  summarise(total = sum(count, na.rm = TRUE)) %>%
+  select(total) %>%
+  unlist 
+```
+
+Next, we calculate the average (across years) number of transplants per 100,000 population for each country. We will use this to order the countries in the heatmap.
+
+```{r, warning=FALSE}
+# order countries by number of transplants averaged over years
+organs.by.country = total.organs %>% 
+  group_by(country) %>%
+  summarise(total = mean(count / population, na.rm = TRUE) * 100000)
+# do a left join to make sure that the countries are in the correct order
+organs.by.country <- left_join(data.frame(country = rownames(donor.matrix)),
+                               organs.by.country,
+                               by = "country")
+organs.by.country <- organs.by.country$total
+```
+
+We also need to identify the region of each country.
+
+```{r}
+# idenitfy the region of each country
+country.region <- total.organs %>% 
+  filter(country %in% rownames(donor.matrix)) %>%
+  select(region, country) %>%
+  distinct(region, country) %>%
+  arrange(country)
+# define a color for each region
+region.col <- factor(country.region$region)
+levels(region.col) <- c("#e6f5c9", "#fdcdac", "#cbd5e8",
+                        "#b3e2cd", "#f4cae4", "#fff2ae")
+region.col.dark <- region.col
+levels(region.col.dark) <- c("#a6d854", "#fc8d62", "#8da0cb",
+                             "#66c2a5", "#e78ac3", "#ffd92f")
+region.col <- as.character(region.col)
+region.col.dark <- as.character(region.col.dark)
+```
+
+Finally, we can plot a superheatmap. The heatmap contains the number of organ donations per 100,000 individuals in each country for each year. To the right of the heatmap, adjacent to each row, we plot the country's Human Development Index, and above the heatmap, we place a line plot which displays the organ donation trend (aggregate across countries) over time.
+
+```{r, fig.align="center", fig.height = 11, fig.width = 7.5}
+library(RColorBrewer)
+# png("../../Figures/organ.png", height = 1100, width = 850)
+superheat(as.matrix(donor.matrix),
+          
+          # set heatmap color map
+          heat.pal = brewer.pal(5, "BuPu"),
+          heat.na.col = "white",
+          
+          # order rows in increasing order of donations
+          order.rows = order(organs.by.country),
+          
+          # grid line colors
+          grid.vline.col = "white",
+          
+          # right plot: HDI
+          yr = as.numeric(as.character(hdi.match.2014$rank)),
+          yr.plot.type = "bar",
+          yr.axis.name = "Human Development\nRanking",
+          yr.plot.size = 0.5,
+          yr.bar.col = region.col.dark,
+          yr.obs.col = region.col,
+          yr.axis.size = 14,
+          yr.axis.name.size = 14,
+          
+          # top plot: donations by year
+          yt = organs.by.year,
+          yt.plot.type = "scatterline",
+          smooth.se = FALSE,
+          yt.axis.name = "Total number\nof transplants\nper year",
+          yt.axis.size = 14,
+          yt.axis.name.size = 14,
+          yt.plot.size = 0.2,
+          yt.point.size = 4,
+          yt.line.size = 2,
+          
+          # left labels
+          left.label.size = 0.5,
+          left.label.text.size = 4,
+          left.label.col = adjustcolor(region.col, alpha.f = 0.3),
+          
+          # bottom labels
+          bottom.label.size = 0.05,
+          bottom.label.col = "white",
+          bottom.label.text.angle = 90,
+          bottom.label.text.alignment = "right",
+          bottom.label.text.size = 8,
+          
+          # legend
+          legend.text.size = 18,
+          legend.height = 0.15,
+          legend.width = 1.5,
+          
+          padding = 0)
+# dev.off()
+```
+
+
