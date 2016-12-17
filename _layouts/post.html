@@ -1,0 +1,45 @@
+---
+layout: default
+---
+<header>
+  <h1 class="header-small">
+    <a href="{{site.url}}{{site.baseurl}}">{{ site.name }}</a>
+  </h1>
+</header>
+<div class="post">
+  <h1 class="post-title">{{ page.title }}</h1>
+  <span class="post-date">
+    <time>{{ page.date | date_to_string }}</time>
+  </span>
+  <div class="post-tag">
+    <ul>
+      {% for tag in page.tags %}
+      <li>
+        <a href="{{ site.url }}{{ site.baseurl }}/tags#{{ tag }}" class="tag">
+          <span class="term">{{ tag }}</span>
+        </a>
+      </li>
+      {% unless forloop.last %}{% endunless %}
+      {% endfor %}
+    </ul>
+  </div>
+
+  {{ content }}
+
+
+  <!-- Share -->
+  {% if page.share != false %}
+  <div class="post-share">
+    <hr>
+    {% include share.html %}
+    <hr>
+  </div>
+  {% endif %}
+
+  <!-- Disqus -->
+  {% if page.comments != false and site.disqus.id %}
+  <section id="disqus_thread"></section>
+  {% include disqus.html %}
+  {% endif %}
+
+</div>
