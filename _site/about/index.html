@@ -41,8 +41,58 @@
 </header>
 <div class="page">
   <h1 class="page-title">About</h1>
-  <p>This page contains the code for the examples from the
+  <p>This site contains the code for the examples from the paper (<em>Superheat: An R package for  creating
+beautiful heatmaps for visualizing complex data</em> by Rebecca L Barter
+and Bin Yu) for the
 <a href="https://github.com/rlbarter/superheat">superheat</a> R package.</p>
+
+<p>This paper contains three open source examples, each of which is based on a publicly available dataset. These examples are</p>
+
+<ul>
+  <li>
+    <p>Case study I: combining data sources to explore global organ
+transplantation trends</p>
+  </li>
+  <li>
+    <p>Case study II: uncovering correlations in language using word2vec</p>
+  </li>
+  <li>
+    <p>Case study III: predicting the brain’s response to visual stimuli using fMRI</p>
+  </li>
+</ul>
+
+<p>Each case study is described breifly below, and is accompanied by a reproducibility rating that describes how easy it would be for you to reproduce the results yourself. It is basically a reflection of how publicly available the data is.</p>
+
+<h3 id="case-study-i-combining-data-sources-to-explore-global-organ-transplantation-trends">Case Study I: combining data sources to explore global organ transplantation trends</h3>
+
+<p>The data for this example comes from two sources. The first is from the Global Observatory on Donation and Transplantation database curated by WHO which can be downloaded from <a href="http://www.transplant-observatory.org/export-database/">here</a>. The second dataset comes from the United Nations Development Program’s Human Development Reports which can be downloaded from <a href="http://hdr.undp.org/en/data#">here</a>.</p>
+
+<blockquote>
+  <p><strong>Reproducibility: easy</strong> (simply download the data into the same directory)</p>
+</blockquote>
+
+<h3 id="case-study-ii-uncovering-correlations-in-language-using-word2vec">Case study II: uncovering correlations in language using word2vec</h3>
+
+<p>Word2Vec is an extremely popular group of models for embedding words into high dimensional spaces such that their relative distances to one another convey semantic meaning. These models are quite remarkable and are an exciting step towards teaching machines to understand language.</p>
+
+<p>In 2013, Google published pre-trained vectors trained on part of the Google News dataset which consists of around 100 billion words. The model contains 300-dimensional vectors for 3 million words and phrases and these vectors can be downloaded from <a href="https://code.google.com/archive/p/word2vec/">here</a>.</p>
+
+<p>The original file is <code class="highlighter-rouge">GoogleNews-vectors-negative300.bin.gz</code>, and the <code class="highlighter-rouge">convert_word2vec.py</code> file  (adapted from suggestions from <a href="http://stackoverflow.com/questions/27324292/convert-word2vec-bin-file-to-text">this stack overflow post</a>) in the <code class="highlighter-rouge">/word2vec</code> folder of this repository contains code to convert the original  file to a .csv format. An R version has been generated and is called <code class="highlighter-rouge">GoogleNews.RData</code>.</p>
+
+<blockquote>
+  <p><strong>Reproducibility: medium</strong> (need to download the large Google News dataset and then convert it to csv using a separate convert_word2vec.py)</p>
+</blockquote>
+
+<h2 id="case-study-iii-predicting-the-brains-response-to-visual-stimuli-using-fmri">Case study III: predicting the brain’s response to visual stimuli using fMRI</h2>
+
+<p>This case study aims to evaluate the performance of a number of models of the brain’s response to visual stimuli. The study is based on data collected from a functional Magnetic Resonance Imaging (fMRI) experiment performed on a single individual by the Gallant neuroscience lab at UC Berkeley. fMRI measures oxygenated blood flow in the brain which can be considered as an indirect measure of neural activity (the two processes are highly correlated). The measurements obtained from an fMRI experiment correspond to the aggregated response of hundreds of thousands of neurons within cube-like voxels of the brain, where the segmentation of the brain into 3D voxels is analogous to the segmentation of an image into 2D pixels.</p>
+
+<p>The data itself is hosted on the Collaborative Research in Computational Neuroscience (CRCNS) Data Sharing repository and can be found <a href="https://crcns.org/data-sets/vc/vim-1">here</a>. However, this repository only contains the voxel responses and the raw images. It does not contain the Gabor wavelet transformations.</p>
+
+<blockquote>
+  <p><strong>Reproducibility: hard</strong> (the data repository unfortunately does not contain the Gabor wavelet features, and some of the code chunks were run using 24 cores of a computer cluster)</p>
+</blockquote>
+
 
 </div>
 

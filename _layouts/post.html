@@ -8,9 +8,6 @@ layout: default
 </header>
 <div class="post">
   <h1 class="post-title">{{ page.title }}</h1>
-  <span class="post-date">
-    <time>{{ page.date | date_to_string }}</time>
-  </span>
   <div class="post-tag">
     <ul>
       {% for tag in page.tags %}
@@ -36,10 +33,6 @@ layout: default
   </div>
   {% endif %}
 
-  <!-- Disqus -->
-  {% if page.comments != false and site.disqus.id %}
-  <section id="disqus_thread"></section>
-  {% include disqus.html %}
-  {% endif %}
+  
 
 </div>
