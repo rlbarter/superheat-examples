@@ -17,7 +17,7 @@ disqus:
 
 # URL
 #url:                "https://rlbarter.github.io" # the base hostname & protocol for your site
-url:                "https://rlbarter.github.io" # use this url when develop
+url:                "https://rlbarter.github.io/superheat-examples" # use this url when develop
 baseurl:            "" # the subpath of your site, e.g. /blog
 
 
