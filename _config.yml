@@ -17,12 +17,12 @@ disqus:
 
 # URL
 #url:                "https://rlbarter.github.io" # the base hostname & protocol for your site
-url:                "http://localhost:4000" # use this url when develop
+url:                "https://rlbarter.github.io/superheat-examples/" # use this url when develop
 baseurl:            "" # the subpath of your site, e.g. /blog
 
 
 # http://en.wikipedia.org/wiki/List_of_tz_database_time_zones
-permalink:          /:year-:month-:day/:title/
+permalink:          /:title/
 
 # Pagination
 paginate:           5
