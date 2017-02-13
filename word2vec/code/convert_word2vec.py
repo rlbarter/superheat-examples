@@ -1,3 +1,5 @@
+# This script was adapted from Franck Dernoncourt's response to this Stack Overflow post: http://stackoverflow.com/questions/27324292/convert-word2vec-bin-file-to-text
+
 import gensim
 import codecs
 from gensim.models import Word2Vec

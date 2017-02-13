@@ -1,12 +1,18 @@
 ---
 title: "Worldwide Organ Donation and Human Development"
 author: "Rebecca Barter"
-date: "11/14/2016"
+date: ""
 output: html_document
 ---
 
 
-There is a universal shortage of organs available for transplantation leading to thousands of people dying on transplant waiting lists every year. Every country has their own system for organ donation, allocation, and transplantation, leading to vastly different donation rates across countries. This case study will use superheat combine two sources of data in order to explore the recent trends in organ donation worldwide and its relation to Human Development using data from the WHO Global Observatory on Donation and Transplantation database and Human Development data from The World Bank. Specifically, we will compare the organ donation trends of 58 countries over a 9-year time period spanning from 2006-2014, and examine the Human Development Index of these countries.
+There is a universal shortage of organs available for transplantation leading to thousands of people dying on transplant waiting lists every year. Every country has their own system for organ donation, allocation, and transplantation, leading to vastly different donation rates across countries. 
+
+This case study will use superheat to combine two sources of data in order to explore the recent trends in organ donation worldwide and its relation to Human Development using data from the WHO Global Observatory on Donation and Transplantation database and Human Development data from The World Bank. 
+
+Specifically, we will compare the organ donation trends of 58 countries over a 9-year time period spanning from 2006-2014, and simultaneously examine the Human Development Index of these countries.
+
+
 
 
 ```{r libraries, message=FALSE, warning=FALSE}
@@ -15,19 +21,19 @@ library(knitr)
 library(dplyr)
 library(DT)
 library(reshape2)
-library(superheat)
 ```
 
 ## Obtaining the organ data
 
 
-The organ donation dataset can be downaloaded from the [ WHO Global Observatory on Donation and Transplantation database](http://www.transplant-observatory.org/export-database/). The Global Observatory on Donation and Transplantation represents the most comprehensive source to date of worldwide data concerning activities in organ donation and transplantation derived from official sources.  The data contains a several measurements concerning the number of organ donations by country from 2000-2014.
+The organ donation dataset can be downloaded from the [ WHO Global Observatory on Donation and Transplantation database](http://www.transplant-observatory.org/export-database/). The Global Observatory on Donation and Transplantation represents the most comprehensive source to date of worldwide data concerning activities in organ donation and transplantation derived from official sources.  The data contains a several measurements concerning the number of organ donations by country from 2000-2014.
 
 The searchable table below displays the raw data, much of which is missing. The data contains 19 measurements on various organ donation counts, for 194 countries.
 
 ```{r}
 # load in the data
 organs.original <- read.csv("raw_data/global-organ-donation.csv")
+# place data in an interactive data table
 DT::datatable(organs.original, fillContainer = T, 
               height = 600, options = list(scrollY = 350))
 ```
@@ -78,9 +84,9 @@ Each variable (column) is described below:
 * `country`: The country
 * `year`: The year 
 * `population`: The country's population 
-* `total.deceased.donors`: The total number of organs donated from deceased individuals. This should be equal to `brain.dead.donors` + `circulatory.death.donors`.
+* `total.deceased.donors`: The total number of organs donated from deceased individuals. This should be equal to `brain.dead.donors` + `circulatory.death.donors`
 * `brain.dead.donors`: The number of organs donated from deceased individuals whose death has been determined by neurological criteria ("brain death")
-* `circulatory.death.donors`: The number of organs donated from deceased individuals whose death has been determined by circulatory criteria ("curculatory death")
+* `circulatory.death.donors`: The number of organs donated from deceased individuals whose death has been determined by circulatory criteria ("circulatory death")
 * `total.utilized.deceased.donors`: The number of organs from deceased donors that were used utilized in a transplant
 * `utilized.brain.dead.donors`: The number of organs from deceased donors (whose death was determined to be brain death) that were utilized in a transplant
 * `utilized.circulatory.death.donors`: The number of organs from deceased donors (whose death was determined to be circulatory death) that were utilized in a transplant
@@ -90,9 +96,9 @@ Each variable (column) is described below:
 * `domino.liver.donors`: The number of domino liver donors
 
 
-These variable names are intuitive and in a consistent format. For example, a variable whose name begins with `total` corresponds to the total of two or more other variables (e.g. `total.kidney.donors` should be the sum of `deceased.kidney.donors` and `living.kidney.donors`). 
+These variable names are significantly more intuitive and are presented in a consistent format. For example, a variable whose name begins with `total` corresponds to the total of two or more other variables (e.g. `total.kidney.donors` should be the sum of `deceased.kidney.donors` and `living.kidney.donors`). 
 
-The structure of the data is described in the Figure below which displays the variable heirarchy. Variables enclosed in a box are expected to add up to their parent variable (this turns out to not always be the case, but this is the *expectation*).
+The structure of the data is described in the Figure below which displays the variable hierarchy. Variables enclosed in a box are expected to add up to their parent variable (this turns out to not always be the case, but this is the *expectation*).
 
 ```{r data-structure, echo=FALSE, fig.align="center"}
 knitr::include_graphics("Figures/organ_variables.png")
@@ -197,7 +203,7 @@ kable(head(donor.matrix[, 1:6]))
 
 ## Obtaining the Human Development Index Data
 
-Next, we want to be able to combine the organ donor data with Human Development Index (HDI) data. The data can be downlaoded from [The World Bank](http://data.worldbank.org/indicator/NY.GDP.MKTP.CD) website. The HDI is calculated based on life expectancy, education and per capita indicators and has been shown to be correlated with organ transplantation.
+Next, we want to be able to combine the organ donor data with Human Development Index (HDI) data. The data can be downloaded from [The World Bank](http://data.worldbank.org/indicator/NY.GDP.MKTP.CD) website. The HDI is calculated based on life expectancy, education and per capita indicators and has been shown to be correlated with organ transplantation.
 
 ```{r}
 # read in gdp data
@@ -226,6 +232,12 @@ hdi$country <- gsub(" ", "", as.character(hdi$country))
 hdi$rank <- as.numeric(as.character(hdi$rank))
 ```
 
+The table below displays the first 6 rows of the HDI dataset.
+
+```{r}
+knitr::kable(head(hdi))
+```
+
 Next, we need to make sure that all of our countries in our organ donor dataset also appear in the HDI dataset. The code below shows that some of the countries are coded differently (e.g. the HDI dataset does not have spaces whereas the organ dataset does). We thus convert the country names in the HDI dataset to those in the organ dataset.
 
 ```{r, collapse = TRUE}
@@ -245,7 +257,7 @@ hdi[hdi$country == "UnitedStates", "country"] <- "United States of America"
 hdi[hdi$country == "Venezuela(BolivarianRepublicof)", "country"] <- "Venezuela (Bolivarian Republic of)"
 ```
 
-Finally, we can filter the HDI dataset to the countries for which we have organ donor data.
+Finally, we can filter the HDI dataset to the countries for which we have organ donor data. Meanwhile, we restrict the HDI rankings to the year 2014 only. These rankings will be placed as bars next to the rows of our heatmap.
 
 
 ```{r, warning=FALSE}
@@ -259,9 +271,9 @@ hdi.match.2014 <- hdi.match %>% filter(year == 2014)
 
 ## Superheat: an evaluation of organ donations by country and its relationship to HDI
 
-Our goal now is to visualize the change in organ donation trends over time by country and assess the relationship between the organ donation . 
+Our goal now is to visualise the change in organ donation trends over time by country and assess the relationship between the organ donation. 
 
-Below we calculate the number of organ donations by year. We will plot this above the columns/years of the heatmap.
+Below we calculate the total number of organ donations by year aggregated over the countries. We will plot this above the columns/years of the heatmap.
 
 ```{r}
 # organ donations by year (aggregated across countries)
@@ -272,7 +284,7 @@ organs.by.year <- total.organs %>%
   unlist 
 ```
 
-Next, we calculate the average (across years) number of transplants per 100,000 population for each country. We will use this to order the countries in the heatmap.
+Next, we calculate the average (over years) number of transplants per 100,000 population for each country. We will use this to order the countries in the heatmap.
 
 ```{r, warning=FALSE}
 # order countries by number of transplants averaged over years
@@ -295,7 +307,7 @@ country.region <- total.organs %>%
   select(region, country) %>%
   distinct(region, country) %>%
   arrange(country)
-# define a color for each region
+# define a colour for each region
 region.col <- factor(country.region$region)
 levels(region.col) <- c("#e6f5c9", "#fdcdac", "#cbd5e8",
                         "#b3e2cd", "#f4cae4", "#fff2ae")
@@ -306,21 +318,48 @@ region.col <- as.character(region.col)
 region.col.dark <- as.character(region.col.dark)
 ```
 
+
+
+
+## Loading Superheat
+
+Installing the superheat package from github is easy if you have the `devtools` package installed in R. Simply type the following command:
+
+```{r install-superheat, eval = FALSE}
+# install devtools if you don't have it already
+install.packages("devtools")
+# install the development version of superheat
+devtools::install_github("rlbarter/superheat")
+```
+
+
+
+Assuming that you didn't run into any unfortunate errors when installing the package, you can load the package into R in the normal way.
+
+```{r load_superheat, message=FALSE, warning=FALSE}
+library(superheat)
+```
+
+
+
+
+
+
 Finally, we can plot a superheatmap. The heatmap contains the number of organ donations per 100,000 individuals in each country for each year. To the right of the heatmap, adjacent to each row, we plot the country's Human Development Index, and above the heatmap, we place a line plot which displays the organ donation trend (aggregate across countries) over time.
 
-```{r, fig.align="center", fig.height = 11, fig.width = 7.5}
+```{r, fig.align="center", fig.height = 11, fig.width = 7.5, eval = FALSE, echo = FALSE}
 library(RColorBrewer)
 # png("../../Figures/organ.png", height = 1100, width = 850)
 superheat(as.matrix(donor.matrix),
           
-          # set heatmap color map
+          # set heatmap colour map
           heat.pal = brewer.pal(5, "BuPu"),
           heat.na.col = "white",
           
           # order rows in increasing order of donations
           order.rows = order(organs.by.country),
           
-          # grid line colors
+          # grid line colours
           grid.vline.col = "white",
           
           # right plot: HDI
@@ -363,6 +402,52 @@ superheat(as.matrix(donor.matrix),
           
           padding = 0)
 # dev.off()
+```
+
+
+
+
+
+```{r, fig.align="center", fig.height = 11, fig.width = 7.5}
+library(RColorBrewer)
+superheat(as.matrix(donor.matrix),
+          
+          # set heatmap color map
+          heat.pal = brewer.pal(5, "BuPu"),
+          heat.na.col = "white",
+          
+          # order rows in increasing order of donations
+          order.rows = order(organs.by.country),
+          
+          # grid line colors
+          grid.vline.col = "white",
+          
+          # right plot: HDI
+          yr = as.numeric(as.character(hdi.match.2014$rank)),
+          yr.plot.type = "bar",
+          yr.axis.name = "Human Development\nRanking",
+          yr.plot.size = 0.5,
+          yr.bar.col = region.col.dark,
+          yr.obs.col = region.col,
+          
+          # top plot: donations by year
+          yt = organs.by.year,
+          yt.plot.type = "scatterline",
+          yt.axis.name = "Total number\nof transplants\nper year",
+          yt.plot.size = 0.2,
+          yt.point.size = 4,
+          yt.line.size = 2,
+          
+          # left labels
+          left.label.size = 0.5,
+          left.label.text.size = 3,
+          left.label.col = adjustcolor(region.col, alpha.f = 0.3),
+          
+          # bottom labels
+          bottom.label.size = 0.05,
+          bottom.label.col = "white",
+          bottom.label.text.angle = 90,
+          bottom.label.text.alignment = "right")
 ```
 
 

@@ -1,5 +1,5 @@
 ---
-title: "Visualizing Word2Vec word vectors using the superheat R package"
+title: "Visualising Word2Vec Word Vectors"
 author: "Rebecca Barter"
 output: 
   html_document
@@ -19,7 +19,7 @@ To blatantly quote the [Wikipedia article](https://en.wikipedia.org/wiki/Word2Ve
 > Word2Vec is a group of related models that are used to produce word embeddings. These models are shallow, two-layer neural networks that are trained to reconstruct linguistic contexts of words. Word2Vec takes as its input a large corpus of text and produces a high-dimensional space (typically of several hundred dimensions), with each unique word in the corpus being assigned a corresponding vector in the space. Word vectors are positioned in the vector space such that words that share common contexts in the corpus are located in close proximity to one another in the space
 
 
-Basically, Word2Vec was developed by a bunch of Googlers as a way to represent words as high-dimensional vectors in such a way that the relative positions of these vectors in space is meaningful in terms of linguistic context. Somehow, this embedding gives rise to algorithmic magic in which equations such as 
+Basically, Word2Vec was developed by a bunch of clever Googlers as a way to represent words as high-dimensional vectors such that the relative positions of these vectors in space is meaningful in terms of linguistic context. Somehow, this embedding gives rise to algorithmic magic in which equations such as 
 
 <p style="text-align: center;"markdown="1"> **king - queen = man - woman**</p>
 
@@ -30,9 +30,9 @@ and its logical extension,
 make sense.
 
 
-Most techniques for **visualizing** relationships between high-dimensional word vectors rely on dimensionality reduction techniques, such as projection onto principal components, or using t-SNE. Some of these visualizations are actually [pretty cool](http://benschmidt.org/Word2Vec_map/). 
+Most techniques for **visualising** relationships between high-dimensional word vectors rely on dimensionality reduction techniques, such as projection onto principal components, or using t-SNE. Some of these visualisations are actually [pretty cool](http://benschmidt.org/Word2Vec_map/). 
 
-This post introduces an alternative approach to visualizing the relationship between word vectors in R that does not rely on dimensionality reduction. Welcome to the beautiful world of superheatmaps!
+This case study introduces an alternative approach to visualising the relationship between word vectors in R that does not rely on dimensionality reduction. Welcome to the beautiful world of superheatmaps!
 
 
 
@@ -48,7 +48,7 @@ library(ggplot2)
 ```
 
 
-The Google News Word2Vec data can be found [here](https://code.google.com/archive/p/Word2Vec/). A long time ago, I used the `convert_Word2Vec.py` Python script to convert it to a .csv, and then read it into R and saved it as an .RData file.
+The Google News Word2Vec data can be found [here](https://code.google.com/archive/p/Word2Vec/). A long time ago, I used the [`convert_Word2Vec.py`](https://github.com/rlbarter/superheat-examples/blob/master/word2vec/code/convert_word2vec.py) Python script to convert it to a .csv, and then read it into R and saved it as an .RData file. This script was adapted from Franck Dernoncourt's response to this [Stack Overflow post](http://stackoverflow.com/questions/27324292/convert-word2vec-bin-file-to-text)
 
 
 
@@ -130,8 +130,7 @@ GoogleNews.common <- GoogleNews[tolower(GoogleNews[,1]) %in% common.words,]
 Next we want to remove the first column corresponding to the words and place these in the row labels.
 
 ```{r cache = TRUE}
-# the first column contains the words so we want to set the row names to 
-# the first column
+# the first column contains the words so we want to set the row names accordingly
 rownames(GoogleNews.common) <- GoogleNews.common[,1]
 # and then remove the first column
 GoogleNews.common <- GoogleNews.common[,-1]
@@ -172,9 +171,9 @@ library(superheat)
 
 
 
-## Visualizing cosine similarity for the 40 most common words
+## Visualising cosine similarity for the 40 most common words
 
-Direct visualization of the raw word vectors themselves is quite uninformative, primarily due to the fact that the original Word2Vec dimensions are somewhat meaningless. Instead, we will visually compare the vectors using cosine similarity, a common similarity metric for Word2Vec data. 
+Direct visualisation of the raw word vectors themselves is quite uninformative, primarily due to the fact that the original Word2Vec dimensions are somewhat meaningless. Instead, we will visually compare the vectors using cosine similarity, a common similarity metric for Word2Vec data. 
 
 First, we restrict to the 40 most common words from the NY Times headlines that are also in the Google News corpus, leaving us with 35 words as there were 5 words from NY Times whose lowercase versions don't appear in the Google News corpus: "nation", "clinton", "bill", "back", "set". 
 
@@ -184,21 +183,11 @@ forty.most.commmon.words <- common.words[1:40][common.words[1:40] %in% rownames(
 length(forty.most.commmon.words)
 ```
 
-Below we print the versions of these words appear in the Google News corpus (note that none of them are entirely lowercase).
-
-```{r, cache = TRUE, collapse=TRUE}
-GoogleNews[, 1][which(tolower(GoogleNews[, 1]) == "nation")]
-GoogleNews[, 1][which(tolower(GoogleNews[, 1]) == "clinton")]
-GoogleNews[, 1][which(tolower(GoogleNews[, 1]) == "bill")]
-GoogleNews[, 1][which(tolower(GoogleNews[, 1]) == "back")]
-GoogleNews[, 1][which(tolower(GoogleNews[, 1]) == "set")]
-```
 
 
 
 
-
-Next we need to write a quick function for computing the pairwise cosine similarity between entries in a matrix.
+Next we need to write a function for computing the pairwise cosine similarity between entries in a matrix. Although the function uses for-loops, it's actually pretty quick.
 
 ```{r cosine, cache=TRUE}
 CosineFun <- function(x, y){
@@ -247,9 +236,9 @@ diag(cosine.similarity) <- NA
 ```
 
 
-Using superheat to visualize the cosine similarity matrix between the set of the 35 most common words, and adding a dendrogram to aide comparisons, we paint a very clear (and pretty!) picture of the relationships between these words.
+Using superheat to visualise the cosine similarity matrix between the set of the 35 most common words, and adding a dendrogram to aide comparisons, we paint a very clear (and pretty!) picture of the relationships between these words.
 
-```{r superheat_30, fig.align='center', fig.width = 10, fig.height = 10, cache=TRUE}
+```{r superheat-30-noshow, fig.align='center', fig.width = 10, fig.height = 10, cache=TRUE, echo = FALSE, eval = FALSE}
 # png("../../Figures/word-cosine.png", height = 900, width = 900)
 superheat(cosine.similarity, 
 
@@ -267,15 +256,30 @@ superheat(cosine.similarity,
 ```
 
 
-For example, we can see that "vote" and "senate", "war" and "iraq", as well as "court" and "case" have similar word vectors. In addition, there appear to be three primary groups of words, the bottom left corner shows that words concerning the political campaign and the Iraq war are very similar, whereas the center block shows that words such as "may" and "will" appear in similar contexts. Finally, words such as "court", "case" and "challenged" also appear in similar contexts.
+```{r superheat_30, fig.align='center', fig.width = 10, fig.height = 10, cache=TRUE}
+superheat(cosine.similarity, 
+
+          # place dendrograms on columns and rows 
+          row.dendrogram = T, 
+          col.dendrogram = T,
+          
+          # make gridlines white for enhanced prettiness
+          grid.hline.col = "white",
+          grid.vline.col = "white",
+          
+          # rotate bottom label text
+          bottom.label.text.angle = 90)
+```
 
 
+For example, we can see that "vote" and "senate", "war" and "iraq", as well as "court" and "case" have similar word vectors. In addition, there appear to be three primary groups of words, the bottom left corner shows that words concerning the political campaign and the Iraq war are very similar, whereas the center block shows that words such as "may" and "will" appear in similar contexts. 
 
-## Visualizing word clusters for the 1000 most common words
 
-Next, if we wanted to visualize more than 30 or so words at once, we can do so by clustering words into meaningful groups.
+## Visualising word clusters for the 1000 most common words
 
-Below we define a new cluster similarity matrix that corresponds to the 1,000 most common words from the NY Times headlines. Note that again, we actually have only 855 words as the lowercase version of 145 of the common words from the NY Times headlines don't appear in the Google News corpus.
+In order to visualise more than 30 or so words at once, we can cluster words into meaningful groups.
+
+Below we define a new cluster similarity matrix that corresponds to the 1,000 most common words from the NY Times headlines. Note that again, we actually have only 855 words since the lowercase version of some common words from the NY Times headlines didn't appear in the Google News corpus.
 
 ```{r cosine_full, cache=TRUE, collapse=TRUE}
 # calculate the cosine similarity between the 1,000 most common words
@@ -283,9 +287,9 @@ cosine.similarity.full <- CosineSim(t(GoogleNews.common))
 dim(cosine.similarity.full)
 ```
 
-Next, using this similarity matrix, we want to cluster the cosine similarity matrix.
+We now want to cluster this cosine similarity matrix.
 
-In order to select the number of clusters, it is vital to evaluate not just the performance of a clustering algorithm in terms of its ability to capture distinct groupings, but also the cluster stability.
+In order to select the number of clusters, we will choose the number that not only effectively captures distinct groupings, but also has the highest cluster stability (i.e. the same clusters are generated when using sub-samples of the data).
 
 ### Choosing the number of clusters
 
@@ -309,7 +313,7 @@ is the average cosine-dissimilarity of $i$ with all other data within the same c
 
 $$b(i) = \min_{C \neq C_i}  d_{\text{cosine}}(x_i, C)$$ 
 
-is the lowest average dissimilarity of $i$ to any other cluster of which $i$ is not a member. Here $C_i$ is the index set of the cluster to which $i$ belongs, and $d_{\text{cosine}}(x, y)$ is a measure of cosine ``distance'', which is equal to 
+is the lowest average dissimilarity of $i$ to any other cluster of which $i$ is not a member. Here $C_i$ is the index set of the cluster to which $i$ belongs, and $d_{\text{cosine}}(x, y)$ is a measure of cosine "distance", which is equal to 
 
 $$d_{\text{cosine}} = \frac{\cos^{-1}(s_{\text{cosine}})}{\pi}$$
 
@@ -368,7 +372,7 @@ cosineSilhouette <- function(cosine.matrix, membership) {
 }
 ```
 
-Using the `cosineSilhouette` function to calculating the average cosine silhouette width for each $k$, we can plot $k$ versus average cosine silhouette width accross all observations for each number of clusters, $k$.
+Using the `cosineSilhouette()` function to calculating the average cosine silhouette width for each $k$, we can plot $k$ versus average cosine silhouette width across all observations for each number of clusters, $k$.
 
 
 ```{r silhouette, cache = TRUE, warning = FALSE}
@@ -387,8 +391,12 @@ sil.width <- sapply(5:20, function(k) {
 # plot k verus silhouette width
 data.frame(k = 5:20, width = sil.width) %>%
   ggplot(aes(x = k, y = width)) +
-  geom_line() + geom_point() +
+  geom_line() + 
+  geom_point() +
   scale_y_continuous(name = "Avergae silhouette width")
+```
+
+```{r echo = FALSE}
 ggsave("../../Figures/silhouette.png", height = 4, width = 8)
 
 ```
@@ -398,7 +406,7 @@ It is fairly obvious from this plot that the best $k$ is $k = 12$.
 
 #### Jaccard Similarity
 
-Next, for each set of cluster membership pairs (where each membership vector is calcualted based on a 90% sub-sample of the data), we want to calculate the Jaccard similarity of the membership vectors. 
+Next, for each set of cluster membership pairs (where each membership vector is calculated based on a 90% sub-sample of the data), we want to calculate the Jaccard similarity of the membership vectors. 
 
 Since each membership iteration corresponds to a 90% sub-sample, we ignore words that are missing from either of the iterations.
 
@@ -429,9 +437,9 @@ generateClusters <- function(similarity.mat, k.range, N) {
 
 
 
-We decide to test the range of $k = 5, ..., 20$ clusters and repeat each of these clusterings accross 100 different 90% sub-sample.
+We decide to test the range of $k = 5, ..., 20$ clusters and repeat each of these clusterings across 100 different 90% sub-sample.
 
-```{r choose-k}
+```{r choose-k, echo = FALSE}
 # generate clusters ranging from 5 to 20 cluster groups for each of 100 subsamples
 # This will take a little while to run so we only run it if the  file doesn't already exist
 if (!file.exists("results/cluster-iterations.RData")) { # run only if not saved
@@ -443,6 +451,16 @@ if (!file.exists("results/cluster-iterations.RData")) { # run only if not saved
 } else {
   load("results/cluster-iterations.RData")
 }
+```
+
+
+```{r eval = FALSE}
+# generate clusters ranging from 5 to 20 cluster groups for each of 100 subsamples
+# This will take a little while to run
+cluster.iterations <- generateClusters(cosine.similarity.full, 
+                                       k.range = 5:20, 
+                                       N = 100)
+
 ```
 
 
@@ -460,20 +478,21 @@ join.cluster.iterations <- lapply(cluster.iterations, function(list) {
                  clusters = cluster.obj$clustering)
       }))
   })
+# clean column names 
 join.cluster.iterations <- lapply(join.cluster.iterations, function(x) {
   colnames(x) <- c("words", paste0("membership", 1:100))
   return(x)
   })
 ```
 
-Below we print the first six entries of the membership vectors for 7 of the 100 iterations when $k = 5$. Notice that there are `NA` values: these corresponse to words that were omitted in the 90% subsample. There are actually 100 membership rows in the full data frame, each correpsonding to an iteration of PAM with $k=5$ on a 90% subsample.
+Below we print the first six entries of the membership vectors for 7 of the 100 iterations when $k = 5$. Notice that there are `NA` values: these correspond to words that were omitted in the 90% subsample. There are actually 100 membership rows in the full data frame, each corresponding to an iteration of PAM with $k=5$ on a 90% subsample.
 
 ```{r}
 # view the first 8 columns of the first data frame (correpsonding to k=5)
 kable(head(join.cluster.iterations[[1]][, 1:8]))
 ```
 
-Next for each pair of these cluster iterations, we can calculate the Jaccard similarity. To speed things up, we wrote a Jaccard function in C++. Note also that to avoid correlations, we take independent pairs: e.g. we calcualte the Jaccard similarity between the membership vector from iterations 1 and 2, and then from 3 and 4, then from 5 and 6, etc. This means that for each value of $k$ we calculate 50 Jaccard similarity values.
+Next for each pair of these cluster iterations, we can calculate the Jaccard similarity. To speed things up, we wrote a Jaccard function in C++. Note also that to avoid correlations, we take independent pairs: e.g. we calculate the Jaccard similarity between the membership vector from iterations 1 and 2, and then from 3 and 4, then from 5 and 6, etc. This means that for each value of $k$ we calculate 50 Jaccard similarity values.
 
 ```{r, cache = TRUE}
 # calculate the pairwise jaccard similarity between each of the cluster 
@@ -501,7 +520,7 @@ jaccard.similarity <- sapply(join.cluster.iterations,
   })
 ```
 
-We next want to melt `jaccard.similarity` into a long-form data frame that is easy to manipulate for visualization.
+We next want to melt `jaccard.similarity` into a long-form data frame that is easy to manipulate for visualisation.
 ```{r}
 # average similarity over simulations
 jaccard.similarity.long <- melt(jaccard.similarity)
@@ -526,8 +545,14 @@ ggplot(jaccard.similarity.long) +
             linetype = "dashed",
             data = jaccard.similarity.avg) +
   ggtitle("Jaccard similarity versus k")
+```
+
+```{r echo = FALSE}
 ggsave("../../Figures/jaccard.png", height = 4, width = 8)
 ```
+
+
+
 
 
 It seems as though for values of $k$ from 8 to 20, there is little difference in the Jaccard similarity (with an average Jaccard similarity value close to 0.5), thus we maintain that $k=12$ is a suitable choice.
@@ -545,7 +570,7 @@ Having decided that $k=12$ is an appropriate number of clusters to generate, we 
 word.clusters <- pam(acos(round(cosine.similarity.full, 10)) / pi, k = 12, diss = TRUE)
 ```
 
-We then define the cluster labels to be the medoid (center) word for that cluster (recall that PAM is like k-means but requires that the centre of the cluster is a data point).
+We then define the cluster labels to be the medoid (center) word for that cluster (recall that PAM is like k-means but requires that the center of the cluster is a data point).
 
 ```{r, collapse=TRUE}
 # print the cluster medoids
@@ -558,7 +583,7 @@ levels(word.membership) <- word.clusters$medoids
 
 ### Plotting a clustered superheatmap with silhouette plot
 
-Next, we can calcualte the cosine silhouette width for each word. We will plot this above the columns of our superheatmap.
+Next, we can calculate the cosine silhouette width for each word. We will plot this above the columns of our superheatmap.
 
 ```{r, warning = FALSE}
 # calcualte the cosine silhouette width
@@ -655,7 +680,7 @@ superheat(cosine.similarity.full,
           title = "(a)")
 ```
 
-The heatmap above is incredibly noisy, so we decide to smooth within each cluster (take the median value of each cell in the cluster).
+Due to the amount of information it contains, the heatmap above appears very grainy, so we decide to smooth within each cluster (take the median value of each cell in the cluster).
 
 
 ```{r, echo = FALSE, fig.show="hide", warning = FALSE}
@@ -700,7 +725,7 @@ superheat(cosine.similarity.full,
 
 
 ```{r, fig.align = "center", fig.height = 9, fig.width = 7, warning = FALSE}
-superheat(cosine.similarity.full,
+superheat(cosine.similarity.full, 
           
           # row and column clustering
           membership.rows = word.membership.padded,
@@ -759,7 +784,18 @@ makeWordCloud <- function(cluster, word.membership, words.freq) {
 
 In each word cloud, the cluster center is in red, and the size corresponds to the word frequency from the NY Times headlines. It is thus interesting to notice that oftentimes the cluster center has fairly low frequency.
 
-```{r, cache = TRUE, fig.show="hold", fig.height = 2.5, fig.width = 2.5, warning = FALSE}
+
+
+```{r, eval = FALSE, cache = TRUE, fig.show="hold", fig.height = 2.5, fig.width = 2.5, warning = FALSE}
+# plot word clouds
+set.seed(52545)
+for (word in levels(word.membership)) {
+  makeWordCloud(word, word.membership, words.freq = freq)
+}
+```
+
+
+```{r, echo = FALSE, cache = TRUE, fig.show="hold", fig.height = 2.5, fig.width = 2.5, warning = FALSE}
 # plot word clouds
 set.seed(52545)
 for (word in levels(word.membership)) {
@@ -769,3 +805,4 @@ for (word in levels(word.membership)) {
   # dev.off()  
 }
 ```
+
