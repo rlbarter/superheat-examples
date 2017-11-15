@@ -12,7 +12,7 @@ knitr::opts_chunk$set(echo = TRUE)
 
 
 
-## An speedy introduction to Word2Vec
+## A speedy introduction to Word2Vec
 
 To blatantly quote the [Wikipedia article](https://en.wikipedia.org/wiki/Word2Vec) on Word2Vec:
 
@@ -48,7 +48,7 @@ library(ggplot2)
 ```
 
 
-The Google News Word2Vec data can be found [here](https://code.google.com/archive/p/Word2Vec/). A long time ago, I used the [`convert_Word2Vec.py`](https://github.com/rlbarter/superheat-examples/blob/master/word2vec/code/convert_word2vec.py) Python script to convert it to a .csv, and then read it into R and saved it as an .RData file. This script was adapted from Franck Dernoncourt's response to this [Stack Overflow post](http://stackoverflow.com/questions/27324292/convert-word2vec-bin-file-to-text)
+The Google News Word2Vec data can be found [here](https://code.google.com/archive/p/word2vec/). A long time ago, I used the [`convert_Word2Vec.py`](https://github.com/rlbarter/superheat-examples/blob/master/word2vec/code/convert_word2vec.py) Python script to convert it to a .csv, and then read it into R and saved it as an .RData file. This script was adapted from Franck Dernoncourt's response to this [Stack Overflow post](http://stackoverflow.com/questions/27324292/convert-word2vec-bin-file-to-text)
 
 
 
@@ -239,7 +239,7 @@ diag(cosine.similarity) <- NA
 Using superheat to visualise the cosine similarity matrix between the set of the 35 most common words, and adding a dendrogram to aide comparisons, we paint a very clear (and pretty!) picture of the relationships between these words.
 
 ```{r superheat-30-noshow, fig.align='center', fig.width = 10, fig.height = 10, cache=TRUE, echo = FALSE, eval = FALSE}
-# png("../../Figures/word-cosine.png", height = 900, width = 900)
+ png("../../Figures/word-cosine.png", height = 900, width = 900)
 superheat(cosine.similarity, 
 
           # place dendrograms on columns and rows 
@@ -251,8 +251,10 @@ superheat(cosine.similarity,
           grid.vline.col = "white",
           
           # rotate bottom label text
-          bottom.label.text.angle = 90)
-# dev.off()
+          bottom.label.text.angle = 90,
+          
+          legend.breaks = c(-0.1, 0.1, 0.3, 0.5))
+ dev.off()
 ```
 
 
@@ -268,7 +270,9 @@ superheat(cosine.similarity,
           grid.vline.col = "white",
           
           # rotate bottom label text
-          bottom.label.text.angle = 90)
+          bottom.label.text.angle = 90,
+          
+          legend.breaks = c(-0.1, 0.1, 0.3, 0.5))
 ```
 
 
@@ -376,6 +380,7 @@ Using the `cosineSilhouette()` function to calculating the average cosine silhou
 
 
 ```{r silhouette, cache = TRUE, warning = FALSE}
+set.seed(238942)
 # calculate the average silhouette width for k=5, ..., 20
 sil.width <- sapply(5:20, function(k) {
   # generate k clusters
@@ -402,7 +407,7 @@ ggsave("../../Figures/silhouette.png", height = 4, width = 8)
 ```
 
 
-It is fairly obvious from this plot that the best $k$ is $k = 12$.
+It is fairly obvious from this plot that the best $k$ is $k = 11$.
 
 #### Jaccard Similarity
 
@@ -555,19 +560,20 @@ ggsave("../../Figures/jaccard.png", height = 4, width = 8)
 
 
 
-It seems as though for values of $k$ from 8 to 20, there is little difference in the Jaccard similarity (with an average Jaccard similarity value close to 0.5), thus we maintain that $k=12$ is a suitable choice.
+It seems as though for values of $k$ from 8 to 20, there is little difference in the Jaccard similarity (with an average Jaccard similarity value close to 0.5), thus we maintain that $k=11$ is a suitable choice.
 
 
-### Clustering with 12 clusters
+### Clustering with 11 clusters
 
 
-Having decided that $k=12$ is an appropriate number of clusters to generate, we use PAM on the full cosine distance matrix (it is easier to provide a dissimilarity matrix than it is to provide a similarity matrix when clustering).
+Having decided that $k=11$ is an appropriate number of clusters to generate, we use PAM on the full cosine distance matrix (it is easier to provide a dissimilarity matrix than it is to provide a similarity matrix when clustering). Later we will compare the clustering we obtain when we set $k=12$ so we will compute this too.
 
 ```{r}
 # note that there are some floating point issues in the similarity matrix:
 # some "1" entires are actually sliiightly larger than 1, so we round to 
 # the nearest 10 dp when calcualting the distance matrix
-word.clusters <- pam(acos(round(cosine.similarity.full, 10)) / pi, k = 12, diss = TRUE)
+word.clusters <- pam(acos(round(cosine.similarity.full, 10)) / pi, k = 11, diss = TRUE)
+word.clusters.12 <- pam(acos(round(cosine.similarity.full, 10)) / pi, k = 12, diss = TRUE)
 ```
 
 We then define the cluster labels to be the medoid (center) word for that cluster (recall that PAM is like k-means but requires that the center of the cluster is a data point).
@@ -577,9 +583,59 @@ We then define the cluster labels to be the medoid (center) word for that cluste
 word.clusters$medoids
 # convert the membership vector to a factor
 word.membership <- factor(word.clusters$clustering)
+
+# print the cluster medoids
+word.clusters.12$medoids
+# convert the membership vector to a factor
+word.membership.12 <- factor(word.clusters.12$clustering)
+
+```
+
+
+```{r}
 # replace integer membership by medoid membership
 levels(word.membership) <- word.clusters$medoids
+# replace integer membership by medoid membership
+levels(word.membership.12) <- word.clusters.12$medoids
 ```
+
+Next, we compare an example of clustering with $k = 11$ and $k = 12$. For the most part, we are curious about which clusters would be forced to split into two or more clusters.Below we plot a superheatmap displaying the proportion of words in each cluster that are the same.
+
+```{r, fig.align="center"}
+# compare the membership vectors with 12 and 13 clusters
+word.membership.split <- split(word.membership, word.membership)
+word.membership.split.12 <- split(word.membership.12, word.membership.12)
+compare.11.12 <- sapply(word.membership.split, function(i) {
+  sapply(word.membership.split.12, function(j) {
+    sum(names(i) %in% names(j)) / length(i)
+  })
+})
+```
+
+```{r fig.align="center"}
+superheat(compare.11.12, 
+          heat.pal = c("white", "grey", "black"),
+          heat.pal.values = c(0, 0.1, 1),
+          column.title = "11 clusters",
+          row.title = "12 clusters",
+          bottom.label.text.angle = 90,
+          bottom.label.size = 0.4)
+```
+
+
+```{r, fig.align="center", echo = FALSE, message=FALSE, warning=FALSE}
+# compare the membership vectors with 12 and 13 clusters
+ png("../../Figures/compare-11-12-clusters.png", height = 750, width = 750)
+ superheat(compare.11.12, 
+          heat.pal = c("white", "grey", "black"),
+          heat.pal.values = c(0, 0.1, 1),
+          column.title = "11 clusters",
+          row.title = "12 clusters",
+          bottom.label.text.angle = 90,
+          bottom.label.size = 0.3)
+ dev.off()
+```
+
 
 ### Plotting a clustered superheatmap with silhouette plot
 
@@ -592,6 +648,7 @@ cosine.silhouette <-
 # arrange the words in the same order as the original matrix
 rownames(cosine.silhouette) <- cosine.silhouette$word
 cosine.silhouette <- cosine.silhouette[rownames(cosine.similarity.full), ]
+
 ```
 
 Next, we want to order the clusters in order of average silhouette width.
@@ -607,12 +664,15 @@ word.membership.padded <- paste0(word.membership, " ")
 # reorder levels based on increasing separation
 word.membership.padded <- factor(word.membership.padded, 
                           levels = paste0(avg.sil.width$membership, " "))
+
 ```
+
+
 
 We are now ready to plot a clustered superheatmap.
 
 ```{r, echo = FALSE, fig.show="hide"}
-# png("../../Figures/word-cosine-cluster.png", height = 1000, width = 750)
+ png("../../Figures/word-cosine-cluster.png", height = 1000, width = 750)
 superheat(cosine.similarity.full,
           
           membership.rows = word.membership.padded,
@@ -643,7 +703,7 @@ superheat(cosine.similarity.full,
           
           title = "(a)",
           title.size = 14)
-# dev.off()
+ dev.off()
 ```
 
 
@@ -684,7 +744,7 @@ Due to the amount of information it contains, the heatmap above appears very gra
 
 
 ```{r, echo = FALSE, fig.show="hide", warning = FALSE}
-# png("../../Figures/word-cosine-cluster-smooth.png", height = 1000, width = 750)
+ png("../../Figures/word-cosine-cluster-smooth.png", height = 1000, width = 750)
 superheat(cosine.similarity.full,
           
           membership.rows = word.membership.padded,
@@ -717,7 +777,7 @@ superheat(cosine.similarity.full,
           
           title = "(b)",
           title.size = 14)
-# dev.off()
+ dev.off()
 ```
 
 
@@ -778,7 +838,7 @@ makeWordCloud <- function(cluster, word.membership, words.freq) {
   words.col[words == cluster] <- "red"
   # the size of the words will be the frequency from the NY Times headlines
   wordcloud(words, words.freq, colors = words.col, 
-            ordered.colors = TRUE, random.order = FALSE, max.words = 50)
+            ordered.colors = TRUE, random.order = FALSE, max.words = 80)
 }
 ```
 
@@ -799,10 +859,10 @@ for (word in levels(word.membership)) {
 # plot word clouds
 set.seed(52545)
 for (word in levels(word.membership)) {
-  # png(file = paste0("../../Figures/wordclouds/", word, "_wordcloud.png"),
-  #    height = 400, width = 400)
+   png(file = paste0("../../Figures/wordclouds/", word, "_wordcloud.png"),
+      height = 400, width = 400)
   makeWordCloud(word, word.membership, words.freq = freq)
-  # dev.off()  
+   dev.off()  
 }
 ```
 

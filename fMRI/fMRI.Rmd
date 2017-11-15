@@ -145,11 +145,7 @@ rm(loc_dat)
 
 ### The voxel responses
 
-The voxel responses to each image was collected for two subjects, "S1" and "S2". We will restrict our analysis to predicting the voxel response in the V1 region for Subject 1 only (see the image below taken from Matthew Schmolesky's [Webvision](http://webvision.med.utah.edu/book/part-ix-psychophysics-of-vision/the-primary-visual-cortex/)).
-
-```{r, echo = FALSE, fig.align = "center"}
-knitr::include_graphics("images/v1.png")
-```
+The voxel responses to each image was collected for two subjects, "S1" and "S2". We will restrict our analysis to predicting the voxel response in the V1 brain region for Subject 1 only.
 
 Loading in the voxel responses (from the `EstimatedResponses.mat` file) involves first converting the .mat file to a format readable by R. Specifically I had to convert the data to version 6 MATLAB file in Octave:
 
@@ -202,15 +198,11 @@ where
 
 * `train.stimuli`: a $1750 \times 128 \times 128$ array corresponding to the 1,750 raw training images each of dimension $128 \times 128$.
 
-* `val.stimuli`: a $120 \times 128 \times 128$ array corresponding to the 120 raw validation images each of dimension $128 \times 128$.
-
-* `train.feat`: a $1750 \times 10921$ matrix corresponding to the 10,921 Gabor wavelet features for each of the 1,750 training images.
-
-* `val.feat`: a $120 \times 10921$ matrix corresponding to the 10,921 Gabor wavelet features for each of the 120 validation images.
-
-* `train.resp`: a $1331 \times 1750$ matrix containing the responses of the 1,331 voxels in the V1 region to each of the 1,750 training images.
-
-* `val.resp`: a $1331 \times 120$ matrix containing the responses of the 1,331 voxels in the V1 region to each of the 120 validation images.
+- `val.stimuli`: a $120 \times 128 \times 128$ array corresponding to the 120 raw validation images each of dimension $128 \times 128$.
+- `train.feat`: a $1750 \times 10921$ matrix corresponding to the 10,921 Gabor wavelet features for each of the 1,750 training images.
+- `val.feat`: a $120 \times 10921$ matrix corresponding to the 10,921 Gabor wavelet features for each of the 120 validation images.
+- `train.resp`: a $1331 \times 1750$ matrix containing the responses of the 1,331 voxels in the V1 region to each of the 1,750 training images.
+- `val.resp`: a $1331 \times 120$ matrix containing the responses of the 1,331 voxels in the V1 region to each of the 120 validation images.
 
 
 ### Missing values
@@ -528,7 +520,7 @@ Next, we plot a heatmap of the *validation response* matrix, that is, the respon
 #     height = 800, width = 1100)
 superheat(val.resp, 
           
-          heat.pal = brewer.pal(5, "RdBu"),
+          heat.pal = brewer.pal(4, "PuOr"),
           yt = prediction.cor$cor,
           yt.axis.name = "Correlation between\npredicted and true\nvoxel responses",
           yt.obs.col = rep("slategray4", ncol(val.resp)),
@@ -568,7 +560,7 @@ superheat(val.resp,
           yt = prediction.cor$cor,
           yt.axis.name = "Correlation between\npredicted and true\nvoxel responses",
           
-          heat.pal = brewer.pal(5, "RdBu"),
+          heat.pal = brewer.pal(4, "PuOr"),
           
           yt.obs.col = rep("slategray4", ncol(val.resp)),
           yt.point.alpha = 0.6,
@@ -604,7 +596,7 @@ superheat(val.resp,
           X.text.col = matrix(c("white", "white", "black", "black"), ncol = 2),
           X.text.size = 8,
           
-          heat.pal = brewer.pal(5, "RdBu"),
+          heat.pal = brewer.pal(4, "PuOr"),
           
           yt = prediction.cor$cor,
           yt.axis.name = "Correlation between\npredicted and true\nvoxel responses",
@@ -649,7 +641,7 @@ superheat(val.resp,
           
           smooth.heat = T,
           
-          heat.pal = brewer.pal(5, "RdBu"),
+          heat.pal = brewer.pal(4, "PuOr"),
           
           yt = prediction.cor$cor,
           yt.axis.name = "Correlation between\npredicted and true\nvoxel responses",
@@ -676,9 +668,8 @@ superheat(val.resp,
 
 What we can see is that the two clusters of voxels behave very differently: 
 
-* the first cluster of voxels is much more active in response to viewings of images from the second cluster of images than to images from the first cluster.
-
-* the second cluster of voxels does not appear to exhibit a strong difference in response to the two clusters of images.
+- the first cluster of voxels is much more active in response to viewings of images from the second cluster of images than to images from the first cluster.
+- the second cluster of voxels does not appear to exhibit a strong difference in response to the two clusters of images.
 
 Furthermore, the predicted responses for the first cluster of voxels are much more correlated with the true responses for these voxels, with an average correlation of around 0.5. The predicted responses to the second cluster of voxels, on the other hand, have approximately zero correlation with the true responses exhibited by these voxels.
 

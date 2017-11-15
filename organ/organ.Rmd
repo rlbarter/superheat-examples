@@ -8,7 +8,7 @@ output: html_document
 
 There is a universal shortage of organs available for transplantation leading to thousands of people dying on transplant waiting lists every year. Every country has their own system for organ donation, allocation, and transplantation, leading to vastly different donation rates across countries. 
 
-This case study will use superheat to combine two sources of data in order to explore the recent trends in organ donation worldwide and its relation to Human Development using data from the WHO Global Observatory on Donation and Transplantation database and Human Development data from The World Bank. 
+This case study will use superheat to combine two sources of data in order to explore the recent trends in organ donation worldwide and its relation to Human Development using data from the WHO Global Observatory on Donation and Transplantation database and Human Development data from The UN. 
 
 Specifically, we will compare the organ donation trends of 58 countries over a 9-year time period spanning from 2006-2014, and simultaneously examine the Human Development Index of these countries.
 
@@ -184,7 +184,8 @@ total.organs <- donor.totals %>%
 few.missing.country <- total.organs %>% 
   group_by(country) %>% 
   # is there more than 1 year with missing data?
-  summarise(missing = sum(is.na(count.by.pop)) > 1) %>%
+  summarise(missing = sum(is.na(count.by.pop)) > 1,
+            missing_num = sum(is.na(count.by.pop))) %>%
   # remove these countries for which there is more than 1 year missing
   filter(!missing) %>%
   # isolte the unfiltered countries
@@ -203,7 +204,7 @@ kable(head(donor.matrix[, 1:6]))
 
 ## Obtaining the Human Development Index Data
 
-Next, we want to be able to combine the organ donor data with Human Development Index (HDI) data. The data can be downloaded from [The World Bank](http://data.worldbank.org/indicator/NY.GDP.MKTP.CD) website. The HDI is calculated based on life expectancy, education and per capita indicators and has been shown to be correlated with organ transplantation.
+Next, we want to be able to combine the organ donor data with Human Development Index (HDI) data. The data can be downloaded from the [United Nations Development Program's Human Development Reports](http://hdr.undp.org/en/data#). The HDI is calculated based on life expectancy, education and per capita indicators and has been shown to be correlated with organ transplantation.
 
 ```{r}
 # read in gdp data
@@ -349,12 +350,12 @@ Finally, we can plot a superheatmap. The heatmap contains the number of organ do
 
 ```{r, fig.align="center", fig.height = 11, fig.width = 7.5, eval = FALSE, echo = FALSE}
 library(RColorBrewer)
-# png("../../Figures/organ.png", height = 1100, width = 850)
+png("../../Figures/organ.png", height = 1100, width = 850)
 superheat(as.matrix(donor.matrix),
           
           # set heatmap colour map
           heat.pal = brewer.pal(5, "BuPu"),
-          heat.na.col = "white",
+          heat.na.col = "grey",
           
           # order rows in increasing order of donations
           order.rows = order(organs.by.country),
@@ -400,10 +401,70 @@ superheat(as.matrix(donor.matrix),
           legend.height = 0.15,
           legend.width = 1.5,
           
+          column.title = "Year",
+          row.title = "Country (colored by geographic region)",
+          
           padding = 0)
-# dev.off()
+dev.off()
 ```
 
+
+
+```{r, fig.align="center", fig.height = 11, fig.width = 7.5, eval = FALSE, echo = FALSE}
+library(RColorBrewer)
+png("../../Figures/organ_subset.png", height = 1400, width = 1600)
+index <- order(organs.by.country, decreasing = TRUE)[1:20]
+superheat(as.matrix(donor.matrix)[index,],
+          
+          # set heatmap colour map
+          heat.pal = brewer.pal(5, "BuPu"),
+          heat.na.col = "grey",
+          
+          # order rows in increasing order of donations
+          order.rows = order(organs.by.country[index]),
+          
+          
+          # right plot: HDI
+          yr = as.numeric(as.character(hdi.match.2014$rank))[index],
+          yr.plot.type = "bar",
+          yr.axis.name = "Human\nDevelopment\nRanking",
+          yr.plot.size = 0.5,
+          yr.bar.col = region.col.dark[index],
+          yr.obs.col = region.col[index],
+          yr.axis.size = 30,
+          yr.axis.name.size = 30,
+          
+          # top plot: donations by year
+          yt = organs.by.year,
+          yt.plot.type = "scatterline",
+          smooth.se = FALSE,
+          yt.axis.name = "Total number\nof transplants\nper year",
+          yt.axis.size = 30,
+          yt.axis.name.size = 30,
+          yt.plot.size = 0.35,
+          yt.point.size = 6,
+          yt.line.size = 4,
+          
+          # left labels
+          left.label.size = 0.9,
+          left.label.text.size = 12,
+          left.label.col = adjustcolor(region.col, alpha.f = 0.3)[index],
+          
+          # bottom labels
+          bottom.label.size = 0.055,
+          bottom.label.col = "white",
+          bottom.label.text.angle = 90,
+          bottom.label.text.alignment = "right",
+          bottom.label.text.size = 12,
+          
+          # legend
+          legend.text.size = 24,
+          legend.height = 0.2,
+          legend.width = 3,
+          
+          padding = 0)
+dev.off()
+```
 
 
 
@@ -449,5 +510,4 @@ superheat(as.matrix(donor.matrix),
           bottom.label.text.angle = 90,
           bottom.label.text.alignment = "right")
 ```
-
 
