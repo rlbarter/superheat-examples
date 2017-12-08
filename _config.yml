@@ -18,7 +18,7 @@ disqus:
 # URL
 #url:                "https://rlbarter.github.io" # the base hostname & protocol for your site
 url:                "https://rlbarter.github.io" # use this url when develop
-baseurl:            "" # the subpath of your site, e.g. /blog
+baseurl:            "superheat-examples" # the subpath of your site, e.g. /blog
 
 
 # http://en.wikipedia.org/wiki/List_of_tz_database_time_zones
